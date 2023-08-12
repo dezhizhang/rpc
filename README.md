@@ -1,5 +1,6 @@
 # rpc
-### 运程调用服务端
+## 运程调用服务端
+### 服务端
 ```go
 func main() {
 	http.HandleFunc("/add", func(w http.ResponseWriter, r *http.Request) {
@@ -43,6 +44,84 @@ func main() {
 	rsp := Add(1, 2)
 	fmt.Println(rsp)
 	//http.NewRequest()
+}
+
+```
+## rcp调用
+### 服务端
+```go
+type HelloService struct{}
+
+func (s *HelloService) Hello(request string, reply *string) error {
+	*reply = "hello" + request
+	return nil
+}
+func main() {
+	//1 实例化一个server
+	listen, _ := net.Listen("tcp", "localhost:8084")
+
+	//2 注册处理逻辑handler
+	_ = rpc.RegisterName("HelloService", &HelloService{})
+
+	// 启动服务
+	conn, _ := listen.Accept()
+
+	rpc.ServeConn(conn)
+}
+```
+### 客户端
+```go
+func main() {
+	client, err := rpc.Dial("tcp", "localhost:8084")
+	if err != nil {
+		log.Printf("链接失败%s", err)
+	}
+	var reply string
+	err = client.Call("HelloService.Hello", "bobby", &reply)
+	if err != nil {
+		panic("调用失败")
+	}
+	fmt.Println(reply)
+
+}
+```
+## jsonrpc调用
+### 服务端
+```go
+type HelloService struct {
+}
+
+func (s *HelloService) Hello(request string, reply *string) error {
+	*reply = "hello" + request
+	return nil
+}
+
+func main() {
+	listener, _ := net.Listen("tcp", ":8080")
+	_ = rpc.RegisterName("HelloService", &HelloService{})
+
+	for {
+		conn, _ := listener.Accept()
+		go rpc.ServeCodec(jsonrpc.NewServerCodec(conn))
+	}
+
+}
+
+```
+### 客户端
+```go
+func main() {
+	conn, err := net.Dial("tcp", "localhost:8080")
+	if err != nil {
+		panic("连接失败")
+	}
+	var reply string
+	client := rpc.NewClientWithCodec(jsonrpc.NewClientCodec(conn))
+	err = client.Call("HelloService.Hello", "bobby", &reply)
+	if err != nil {
+		panic("调用失败")
+	}
+	fmt.Println(reply)
 }
 
 ```
