@@ -125,3 +125,76 @@ func main() {
 }
 
 ```
+## go下的grpc调用
+### proto文件
+```go
+syntax = "proto3";
+
+option go_package = ".;proto";
+
+
+service Greeter {
+  rpc SayHello(HelloRequest) returns(HelloReply){}
+}
+
+
+message HelloRequest {
+  string name = 1;
+}
+
+message HelloReply {
+  string message = 1;
+}
+```
+### 服务端
+```go
+type Server struct {
+	pb.UnimplementedGreeterServer
+}
+
+func (s *Server) mustEmbedUnimplementedGreeterServer() {
+	//TODO implement me
+	fmt.Println("hello")
+
+}
+
+// SayHello rpc调用
+func (s *Server) SayHello(ctx context.Context, request *pb.HelloRequest) (*pb.HelloReply, error) {
+	return &pb.HelloReply{Message: "hello " + request.GetName()}, nil
+}
+
+func main() {
+	g := grpc.NewServer()
+	pb.RegisterGreeterServer(g, &Server{})
+
+	listen, err := net.Listen("tcp", ":8084")
+	if err != nil {
+		panic(err)
+	}
+	err = g.Serve(listen)
+	if err != nil {
+		panic(err)
+	}
+
+}
+
+```
+### 客户端
+```go
+func main() {
+	conn, err := grpc.Dial("localhost:8084", grpc.WithInsecure())
+	if err != nil {
+		panic(err)
+	}
+	defer conn.Close()
+	c := proto.NewGreeterClient(conn)
+
+	r, err1 := c.SayHello(context.Background(), &proto.HelloRequest{Name: "bobby"})
+	if err1 != nil {
+		fmt.Println("err", err1.Error())
+	}
+
+	fmt.Println(r.Message)
+
+}
+```
