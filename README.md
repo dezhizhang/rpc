@@ -198,3 +198,88 @@ func main() {
 
 }
 ```
+## protobuf不同proto的引用
+### 通过import来引用
+```go
+syntax = "proto3";
+import "base.proto";
+import  "google/protobuf/empty.proto";
+option go_package=".;proto";
+
+service Greeter {
+  rpc SayHello(HelloRequest) returns(HelloReply);
+  rpc Ping(google.protobuf.Empty) returns(Pong);
+}
+
+message HelloRequest {
+  string url = 1;
+  string name = 2;
+}
+
+message HelloReply {
+  string message = 1;
+}
+```
+### protobuf枚举类型
+```go
+enum Gender {
+  MALE = 0;
+  FEMALE = 1;
+}
+
+message HelloRequest {
+  string url = 1;
+  string name = 2;
+  Gender  gender = 3;
+}
+```
+### 枚举类型的引用
+```go
+func main() {
+	conn, err := grpc.Dial("localhost:8082", grpc.WithInsecure())
+	if err != nil {
+		panic(err)
+	}
+	defer conn.Close()
+
+	client := proto.NewGreeterClient(conn)
+	rsp, _ := client.SayHello(context.Background(), &proto.HelloRequest{
+		Name:   "刘德华",
+		Url:    "http://www.xiaozhi.shop",
+		Gender: proto.Gender_FEMALE,
+	})
+	fmt.Println(rsp.Message)
+}
+
+```
+### protobuf中map的定义
+```go
+message HelloRequest {
+  string url = 1; //网站
+  string name = 2; // 姓名
+  Gender  gender = 3; // 姓别
+  map<string,string> mp = 4;
+}
+```
+### map的使用
+```go
+func main() {
+	conn, err := grpc.Dial("localhost:8082", grpc.WithInsecure())
+	if err != nil {
+		panic(err)
+	}
+	defer conn.Close()
+
+	client := proto.NewGreeterClient(conn)
+	rsp, _ := client.SayHello(context.Background(), &proto.HelloRequest{
+		Name:   "刘德华",
+		Url:    "http://www.xiaozhi.shop",
+		Gender: proto.Gender_FEMALE,
+		Mp: map[string]string{
+			"name": "周华建",
+			"age":  "222",
+		},
+	})
+	fmt.Println(rsp.Message)
+}
+```
