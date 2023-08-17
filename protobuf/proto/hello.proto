@@ -1,6 +1,7 @@
 syntax = "proto3";
 import "base.proto";
 import  "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
 option go_package = ".;proto";
 
 service Greeter {
@@ -18,6 +19,7 @@ message HelloRequest {
   string name = 2; // 姓名
   Gender  gender = 3; // 姓别
   map<string,string> mp = 4;
+  google.protobuf.Timestamp createTime = 5;
 }
 
 message HelloReply {
