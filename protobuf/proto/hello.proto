@@ -1,0 +1,31 @@
+syntax = "proto3";
+import "base.proto";
+import  "google/protobuf/empty.proto";
+option go_package = ".;proto";
+
+service Greeter {
+  rpc SayHello(HelloRequest) returns(HelloReply);
+  rpc Ping(google.protobuf.Empty) returns(Pong);
+}
+
+enum Gender {
+  MALE = 0;
+  FEMALE = 1;
+}
+
+message HelloRequest {
+  string url = 1;
+  string name = 2;
+  Gender  gender = 3;
+}
+
+message HelloReply {
+  string message = 1;
+  message Result {
+    string name = 1;
+    string url = 2;
+  }
+
+  repeated Result data = 2;
+}
+
