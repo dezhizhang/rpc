@@ -1,7 +1,13 @@
 # rpc
-## 运程调用服务端
-### 服务端
+
+### 生成proto
 ```go
+ protoc --go_out=. --go_opt=paths=source_relative  --go-grpc_out=. --go-grpc_opt=paths=source_relative hello.proto
+```
+## 运程调用服务端
+
+```go
+### 服务端
 func main() {
 	http.HandleFunc("/add", func(w http.ResponseWriter, r *http.Request) {
 		err := r.ParseForm()
@@ -282,4 +288,181 @@ func main() {
 	})
 	fmt.Println(rsp.Message)
 }
+```
+### 使用protobuf内置的timestamp类型
+```go
+message HelloRequest {
+    string url = 1; //网站
+    string name = 2; // 姓名
+    Gender  gender = 3; // 姓别
+    map<string,string> mp = 4;
+    google.protobuf.Timestamp createTime = 5;
+}
+func main() {
+    conn, err := grpc.Dial("localhost:8082", grpc.WithInsecure())
+    if err != nil {
+    panic(err)
+    }
+    defer conn.Close()
+
+    client := proto.NewGreeterClient(conn)
+    rsp, _ := client.SayHello(context.Background(), &proto.HelloRequest{
+    Name:   "刘德华",
+    Url:    "http://www.xiaozhi.shop",
+    Gender: proto.Gender_FEMALE,
+    Mp: map[string]string{
+        "name": "周华建",
+        "age":  "222",
+    },
+        CreateTime: timestamppb.New(time.Now()),
+    })
+    fmt.Println(rsp.Message)
+}
+```
+## grpc拦截器
+### 服务端
+```go
+type Server struct {
+	pb.UnimplementedGreeterServer
+}
+
+func (s *Server) SayHello(ctx context.Context, request *pb.HelloRequest) (*pb.HelloReply, error) {
+	return &pb.HelloReply{Message: "hello " + request.GetName()}, nil
+}
+
+func main() {
+	interceptor := func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (rsp interface{}, err error) {
+		fmt.Println("接收到一个新的请求")
+		return nil, nil
+		i, err := handler(ctx, req)
+		return i, err
+	}
+	opt := grpc.UnaryInterceptor(interceptor)
+	g := grpc.NewServer(opt)
+	pb.RegisterGreeterServer(g, &Server{})
+	listen, err := net.Listen("tcp", ":8084")
+	if err != nil {
+		panic(err)
+	}
+
+	err = g.Serve(listen)
+	if err != nil {
+		panic(err)
+	}
+}
+
+```
+### 客户端
+```go
+func main() {
+	interceptor := func(ctx context.Context, method string, req, reply interface{}, cc *grpc.ClientConn, invoke grpc.UnaryInvoker, opts ...grpc.CallOption) error {
+		start := time.Now()
+		err := invoke(ctx, method, req, reply, cc, opts...)
+		fmt.Printf("用时:%s", time.Since(start))
+		return err
+	}
+	opt := grpc.WithUnaryInterceptor(interceptor)
+	conn, err := grpc.Dial("localhost:8084", grpc.WithInsecure(), opt)
+	if err != nil {
+		panic(err)
+	}
+
+	defer conn.Close()
+
+	c := proto.NewGreeterClient(conn)
+
+	r, err1 := c.SayHello(context.Background(), &proto.HelloRequest{Name: "刘德华"})
+	if err1 != nil {
+		panic(err)
+	}
+
+	fmt.Println(r.Message)
+}
+
+```
+
+
+## grpc验证
+### 服务端
+```go
+type Server struct {
+	pb.UnimplementedGreeterServer
+}
+
+func (s *Server) SayHello(ctx context.Context, request *pb.HelloRequest) (*pb.HelloReply, error) {
+	return &pb.HelloReply{Message: "hello " + request.GetName()}, nil
+}
+
+func main() {
+	interceptor := func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (rsp interface{}, err error) {
+		md, ok := metadata.FromIncomingContext(ctx)
+		if !ok {
+			return rsp, status.Error(codes.Unauthenticated, "无token认证信息")
+		}
+		var appId string
+		var appKey string
+		if val, ok := md["appId"]; ok {
+			appId = val[0]
+		}
+		if val, ok := md["appKey"]; ok {
+			appKey = val[0]
+		}
+
+		fmt.Println(appId, appKey)
+
+		if appId != "101010" || appKey != "i am key" {
+			return rsp, status.Error(codes.Unauthenticated, "无token认证信息")
+		}
+
+		//fmt.Println("接收到一个请求")
+		i, err := handler(ctx, req)
+		return i, err
+	}
+	opt := grpc.UnaryInterceptor(interceptor)
+	g := grpc.NewServer(opt)
+	pb.RegisterGreeterServer(g, &Server{})
+	listen, err := net.Listen("tcp", ":8084")
+	if err != nil {
+		panic(err)
+	}
+	err = g.Serve(listen)
+	if err != nil {
+		panic(err)
+	}
+}
+
+```
+### 客户端
+```go
+func main() {
+	interceptor := func(ctx context.Context, method string, req, reply interface{}, cc *grpc.ClientConn, invoke grpc.UnaryInvoker, opts ...grpc.CallOption) error {
+		start := time.Now()
+		md := metadata.New(map[string]string{
+			"appId":  "101010",
+			"appKey": "i am key",
+		})
+
+		ctx = metadata.NewOutgoingContext(context.Background(), md)
+		err := invoke(ctx, method, req, reply, cc, opts...)
+		fmt.Printf("用时:%s", time.Since(start))
+		return err
+	}
+	var opts []grpc.DialOption
+	opts = append(opts, grpc.WithInsecure())
+	opts = append(opts, grpc.WithUnaryInterceptor(interceptor))
+	//opt := grpc.WithUnaryInterceptor(interceptor)
+	conn, err := grpc.Dial("localhost:8084", opts...)
+	if err != nil {
+		panic(err)
+	}
+	defer conn.Close()
+
+	c := proto.NewGreeterClient(conn)
+	r, err1 := c.SayHello(context.Background(), &proto.HelloRequest{Name: "刘德华"})
+	if err1 != nil {
+		panic(err1)
+	}
+	fmt.Println(r.Message)
+}
+
 ```

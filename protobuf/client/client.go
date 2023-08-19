@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"google.golang.org/grpc"
+	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
+	"time"
 	"xiaozhi/protobuf/proto"
 )
 
@@ -23,6 +25,7 @@ func main() {
 			"name": "周华建",
 			"age":  "222",
 		},
+		CreateTime: timestamppb.New(time.Now()),
 	})
 	fmt.Println(rsp.Message)
 }
