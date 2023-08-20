@@ -4,6 +4,6 @@ import "gorm.io/gorm"
 
 type User struct {
 	gorm.Model
-	Name string `json:"name"`
-	Age  int    `json:"age"`
+	Username string `gorm:"column:username;type:varchar(50)"`
+	Age      int    `json:"age"`
 }

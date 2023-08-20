@@ -466,3 +466,30 @@ func main() {
 }
 
 ```
+### gorm的批量插入
+```go
+func main() {
+	var users []model.User
+	for i := 0; i < 100; i++ {
+		users = append(users, model.User{Username: fmt.Sprintf("刘德华%d", i), Age: i})
+	}
+
+	tx := driver.DB.Model(&model.User{}).CreateInBatches(&users, 100)
+	fmt.Println(tx.RowsAffected)
+
+}
+```
+### gorm询操作
+```go
+func main() {
+
+	var user model.User
+	tx := driver.DB.Model(&user).Where("username = ?", "刘德华20").Find(&user)
+	if tx.Error != nil {
+		log.Fatalf("获取失败%s", tx.Error)
+	}
+	fmt.Println(user)
+
+}
+
+```

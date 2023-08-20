@@ -9,14 +9,11 @@ import (
 
 func main() {
 
-	user := model.User{
-		Name: "周华建",
-		Age:  22,
+	var user model.User
+	tx := driver.DB.Model(&user).Where("username = ?", "刘德华20").Find(&user)
+	if tx.Error != nil {
+		log.Fatalf("获取失败%s", tx.Error)
 	}
-	err := driver.DB.Model(&model.User{}).Where("id = ?", 2).Updates(&user).Error
-	if err != nil {
-		log.Fatalf("更新失败%s", err)
-	}
-	fmt.Println("更新成功")
+	fmt.Println(user)
 
 }
