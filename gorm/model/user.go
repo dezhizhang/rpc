@@ -4,13 +4,10 @@ import "gorm.io/gorm"
 
 type User struct {
 	gorm.Model
-	Username  string `gorm:"column:username;type:varchar(50)"`
-	Age       int    `json:"age"`
-	CompanyId int    `json:"companyId"`
-	Company   Company
+	Languages []Language `gorm:"many2many:user_languages;"`
 }
 
-type Company struct {
-	ID   int    `gorm:"colum:id;type:int" json:"ID"`
-	Name string `gorm:"colum:name;type:varchar(50)"json:"Name"`
+type Language struct {
+	gorm.Model
+	Name string `json:"name"`
 }

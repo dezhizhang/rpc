@@ -572,3 +572,24 @@ func main() {
 }
 
 ```
+
+### 表的多对多
+```go
+func main() {
+	var languages []model.Language
+	languages = append(languages, model.Language{Name: "GO"})
+	languages = append(languages, model.Language{Name: "java"})
+
+	user := model.User{
+		Languages: languages,
+	}
+
+	err := driver.DB.Create(&user).Error
+
+	if err != nil {
+		log.Printf("创建失败%s", err.Error())
+	}
+
+	fmt.Println("创建成功")
+}
+```

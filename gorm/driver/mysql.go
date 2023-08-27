@@ -29,7 +29,7 @@ func InitMySql() {
 		panic(err)
 	}
 
-	DB.AutoMigrate(&model.User{}, &model.Company{})
+	DB.AutoMigrate(&model.User{}, &model.Language{})
 }
 
 func init() {
