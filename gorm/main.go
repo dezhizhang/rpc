@@ -9,20 +9,14 @@ import (
 
 func main() {
 
-	//var user model.User
-	//tx := driver.DB.Where(&model.User{Username: "刘德华14"}).Find(&user)
-	//if tx.Error != nil {
-	//	log.Fatalf("获取失败%s", tx.Error)
-	//}
-	//fmt.Println(user.Username)
+	var user model.User
+	driver.DB.Where(&model.User{Username: "刘德华0"}).Find(&user)
 
-	var users []model.User
-	tx := driver.DB.Where(map[string]interface{}{
-		"username": "刘德华14",
-	}).Find(&users)
-
-	if tx.Error != nil {
-		log.Fatalf("查询失败%s", tx.Error)
+	user.Username = "周华建"
+	err := driver.DB.Save(&user).Error
+	if err != nil {
+		log.Fatalf("更新失败%s", err)
 	}
-	fmt.Println(users[0].Username)
+	fmt.Println("更新成功")
+
 }
