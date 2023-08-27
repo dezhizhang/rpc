@@ -556,3 +556,19 @@ if err != nil {
 
 
 ```
+### 多表查询
+```go
+func main() {
+	user := model.User{
+		Company: model.Company{},
+	}
+
+	err := driver.DB.Preload("Company").Find(&user).Error
+	if err != nil {
+		log.Printf("查询失败%s", err)
+	}
+
+	fmt.Println(user.Company.Name)
+}
+
+```

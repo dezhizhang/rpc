@@ -8,22 +8,17 @@ import (
 )
 
 func main() {
-
-	company := model.Company{
-		Name: "晓智科技",
-	}
+	company := model.Company{}
 
 	user := model.User{
-		Username: "晓智",
-		Company:  company,
+		Company: company,
 	}
 
-	err := driver.DB.Create(&user).Error
+	err := driver.DB.Preload("Company").Model(&model.User{}).Where("id=?", 4).Find(&user).Error
 
 	if err != nil {
-		log.Printf("插入失败%s", err)
+		log.Printf("查询失败%s", err.Error())
 	}
 
-	fmt.Println("插入成功")
-
+	fmt.Println(user.Company.Name)
 }
