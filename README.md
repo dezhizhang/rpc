@@ -509,3 +509,25 @@ func main() {
 
 }
 ```
+### 更新操作
+```go
+err := driver.DB.Where("id = ?", 205).Updates(&model.User{Username: "哈哈", Age: 44}).Error
+    if err != nil {
+		log.Printf("更新失败%s", err)
+	}
+	
+	fmt.Println("更新成功")
+```
+### 删除操作
+```go
+func main() {
+	
+	err := driver.DB.Where("id = ?", 206).Unscoped().Delete(&model.User{}).Error
+	if err != nil {
+		log.Printf("删除失败%s", err)
+	}
+
+	fmt.Println("删除成功")
+
+}
+```

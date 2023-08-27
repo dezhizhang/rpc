@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"xiaozhi/gorm/driver"
 	"xiaozhi/gorm/model"
@@ -9,14 +8,17 @@ import (
 
 func main() {
 
-	var user model.User
-	driver.DB.Where(&model.User{Username: "刘德华0"}).Find(&user)
-
-	user.Username = "周华建"
-	err := driver.DB.Save(&user).Error
-	if err != nil {
-		log.Fatalf("更新失败%s", err)
+	user := model.User{
+		Username: "周华建",
+		Company: model.Company{
+			Name: "晓智科技",
+			ID:   1,
+		},
 	}
-	fmt.Println("更新成功")
+
+	err := driver.DB.Create(&user).Error
+	if err != nil {
+		log.Fatalf("设置失败%s", err)
+	}
 
 }
