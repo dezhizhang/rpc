@@ -636,3 +636,36 @@ func main() {
 }
 
 ```
+### 结构体引用类型必须初始化
+```go
+type Course struct {
+	Name string `json:"name"`
+	Desc string `json:"desc"`
+}
+
+func (c *Course) String() string {
+	return c.Name + c.Desc
+}
+
+func main() {
+	c := &Course{}
+	fmt.Println(c.String())
+}
+
+```
+### 变量的循环引用
+```go
+func main() {
+	var out []*int
+
+	for i := 0; i < 3; i++ {
+		tmp := i
+		out = append(out, &tmp)
+	}
+
+	for _, value := range out {
+		fmt.Println(*value)
+	}
+}
+
+```
