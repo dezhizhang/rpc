@@ -14,17 +14,24 @@ type User struct {
 }
 
 const mapping = `
-	"mappings":{
-		"properties":{
-			"name":{
-			"type":"text",
-			"analyzer":"ik_max_word",
-		},
-		"id":{
-			"type":"integer",
-		}
-	}
-}
+	 "mappings": {
+    "properties": {
+      "name": {
+        "type": "text"
+      },
+      "age": {
+        "type": "long"
+      },
+      "sex": {
+        "type": "boolean"
+      },
+      "grade": {
+        "type": "object",
+        "dynamic": "true"
+      }
+    }
+  }
+
 `
 
 func main() {
@@ -58,7 +65,7 @@ func main() {
 	//fmt.Println(put)
 
 	// 创建索引
-	do, err := client.CreateIndex("user").BodyString(mapping).Do(context.Background())
+	do, err := client.CreateIndex("goods").BodyString(mapping).Do(context.Background())
 	if err != nil {
 		panic(err)
 	}

@@ -627,3 +627,12 @@ func main() {
 
 }
 ```
+### map初始化
+```go
+func main() {
+	var course = make(map[string]string, 2)
+	course["name"] = "周华建"
+	fmt.Println(course["name"])
+}
+
+```
