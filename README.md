@@ -669,3 +669,59 @@ func main() {
 }
 
 ```
+### 泛型
+```go
+func Add[T int | int32 | float64 | string](a, b T) T {
+	return a + b
+}
+
+func main() {
+	print(Add("hello", "world"))
+}
+
+```
+### 泛型结构体
+```go
+type User[T int | bool] struct {
+	Name string `json:"name"`
+	Age  T      `json:"age"`
+}
+
+func main() {
+	user := User[bool]{
+		Name: "刘德华",
+		Age:  false,
+	}
+
+	fmt.Println(user)
+}
+
+```
+
+### 命令行工具
+```go
+var command = &cobra.Command{
+	Use:   "api",
+	Short: "a brief description of your application",
+	Long:  "a longer description",
+}
+
+var mockCommand = &cobra.Command{
+	Use:   "mock",
+	Short: "批量发送数据",
+	Long:  "",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		fmt.Println("call mock")
+		return nil
+	},
+}
+
+func main() {
+	command.AddCommand(mockCommand)
+	err := command.Execute()
+	if err != nil {
+		panic(err)
+	}
+}
+
+```
