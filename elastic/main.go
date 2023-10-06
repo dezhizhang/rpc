@@ -1,75 +1,46 @@
 package main
 
-import (
-	"context"
-	"fmt"
-	"github.com/olivere/elastic/v7"
-	"log"
-	"os"
-)
-
-type User struct {
-	Name string `json:"name"`
-	Age  int    `json:"age"`
+type Article struct {
+	Title   string `json:"title"`
+	Content string `json:"content"`
 }
 
-const mapping = `
-	 "mappings": {
-    "properties": {
-      "name": {
-        "type": "text"
-      },
-      "age": {
-        "type": "long"
-      },
-      "sex": {
-        "type": "boolean"
-      },
-      "grade": {
-        "type": "object",
-        "dynamic": "true"
-      }
-    }
-  }
-
-`
+//func createIndex(client *elastic.Client, indexName string) {
+//	ctx := context.Background()
+//	exists, err := client.IndexExists(indexName).Do(ctx)
+//
+//	if err != nil {
+//		log.Fatalf("Error checking if index [%s] exists: %v", indexName, err)
+//	}
+//
+//	if !exists {
+//		createIndex, err := client.CreateIndex(indexName).Do(ctx)
+//
+//		if err != nil {
+//			log.Fatalf("Error creating index: %v", err)
+//		}
+//		if createIndex.Acknowledged {
+//			fmt.Printf("Index [%s] created\n", indexName)
+//		}
+//	}
+//}
 
 func main() {
-	host := "http://localhost:9200"
-	logger := log.New(os.Stdout, "xiaozhi", log.LstdFlags)
-	client, err := elastic.NewClient(elastic.SetURL(host), elastic.SetSniff(false), elastic.SetTraceLog(logger))
-	if err != nil {
-		panic(err)
-	}
-	//q := elastic.NewMatchQuery("address", "street")
-	//do, err := client.Search().Index("user").Query(q).Do(context.Background())
+	//host := "http://localhost:9200"
+	//logger := log.New(os.Stdout, "xiaozhi", log.LstdFlags)
+	//client, err := elastic.NewClient(elastic.SetURL(host), elastic.SetSniff(false), elastic.SetTraceLog(logger))
+	//if err != nil {
+	//	panic(err)
+	//}
+
+	//createIndex(client, "article")
+
+	//// 创建索引
+	//do, err := client.CreateIndex("goods").BodyString(mapping).Do(context.Background())
 	//if err != nil {
 	//	panic(err)
 	//}
 	//
-	//for _, value := range do.Hits.Hits {
-	//	var user User
-	//	err := json.Unmarshal(value.Source, &user)
-	//	if err != nil {
-	//		panic(err)
-	//	}
-	//	fmt.Println(user)
-	//}
-	//
-	//user := User{Name: "张德地", Age: 30}
-	//put, err := client.Index().Index("user").Id("3").BodyJson(&user).Do(context.Background())
-	//if err != nil {
-	//	panic(err)
-	//}
-	//
-	//fmt.Println(put)
-
-	// 创建索引
-	do, err := client.CreateIndex("goods").BodyString(mapping).Do(context.Background())
-	if err != nil {
-		panic(err)
-	}
-
-	fmt.Println(do)
+	//fmt.Println(do)
 
 }
