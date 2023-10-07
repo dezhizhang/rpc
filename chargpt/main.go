@@ -22,7 +22,7 @@ import (
  */
 
 var (
-	hostUrl   = "wss://spark-api.xf-yun.com/v2.1/chat"
+	hostUrl   = "wss://aichat.xf-yun.com/v1/chat"
 	appid     = "3866e24a"
 	apiSecret = "MDVlMmRhMDk2YmZiZTIyYjNhNmFjYWJl"
 	apiKey    = "b20c30ae86a924686bf5d79f04a60647"
@@ -35,7 +35,7 @@ func main() {
 		HandshakeTimeout: 5 * time.Second,
 	}
 	//握手并建立websocket 连接
-	conn, resp, err := d.Dial(assembleAuthUrl1(hostUrl, apiKey, apiSecret), nil)
+	conn, resp, err := d.Dial(assemUrl1(hostUrl, apiKey, apiSecret), nil)
 	if err != nil {
 		panic(readResp(resp) + err.Error())
 		return
