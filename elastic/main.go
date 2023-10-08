@@ -6,13 +6,12 @@ import (
 	"github.com/olivere/elastic/v7"
 	"log"
 	"os"
-	"reflect"
 )
 
 type User struct {
 	Name string `json:"name"`
 	Sex  string `json:"sex"`
-	Tel  string `json:"tel"`
+	Age  string `json:"age"`
 }
 
 // 新增
@@ -231,11 +230,82 @@ type User struct {
 //
 //}
 
+//func main() {
+//	var err error
+//	var user User
+//	var client *elastic.Client
+//	var res *elastic.SearchResult
+//	host := "http://localhost:9200"
+//	logger := log.New(os.Stdout, "elastic", log.LstdFlags)
+//	client, err = elastic.NewClient(elastic.SetURL(host), elastic.SetSniff(false), elastic.SetTraceLog(logger))
+//	if err != nil {
+//		panic(err)
+//	}
+//
+//	res, err = client.Search("user").Do(context.Background())
+//	if err != nil {
+//		panic(err)
+//	}
+//
+//	for _, item := range res.Each(reflect.TypeOf(user)) {
+//		t := item.(User)
+//		fmt.Printf("%#v\t", t)
+//	}
+//
+//}
+
+//func main() {
+//	var err error
+//	var user User
+//	var client *elastic.Client
+//	var res *elastic.SearchResult
+//	host := "http://localhost:9200"
+//	logger := log.New(os.Stdout, "elastic", log.LstdFlags)
+//
+//	client, err = elastic.NewClient(elastic.SetURL(host), elastic.SetSniff(false), elastic.SetTraceLog(logger))
+//	if err != nil {
+//		panic(err)
+//	}
+//	res, err = client.Search("user").Do(context.Background())
+//	if err != nil {
+//		panic(err)
+//	}
+//	for _, item := range res.Each(reflect.TypeOf(user)) {
+//		t := item.(User)
+//		fmt.Println(t)
+//	}
+//
+//}
+
+// ### 范围查询
+//func main() {
+//	var err error
+//	var client *elastic.Client
+//	var res *elastic.SearchResult
+//
+//	host := "http://localhost:9200"
+//	logger := log.New(os.Stdout, "elastic", log.LstdFlags)
+//	client, err = elastic.NewClient(elastic.SetURL(host), elastic.SetSniff(false), elastic.SetTraceLog(logger))
+//	if err != nil {
+//		panic(err)
+//	}
+//
+//	boolq := elastic.NewBoolQuery()
+//	boolq.Must(elastic.NewMatchQuery("name", "刘德华"))
+//	boolq.Filter(elastic.NewRangeQuery("age").Gt(30))
+//	res, err = client.Search("user").Query(boolq).Do(context.Background())
+//
+//	if err != nil {
+//		panic(err)
+//	}
+//	fmt.Println(res)
+//}
+
 func main() {
 	var err error
-	var user User
 	var client *elastic.Client
 	var res *elastic.SearchResult
+
 	host := "http://localhost:9200"
 	logger := log.New(os.Stdout, "elastic", log.LstdFlags)
 	client, err = elastic.NewClient(elastic.SetURL(host), elastic.SetSniff(false), elastic.SetTraceLog(logger))
@@ -243,14 +313,13 @@ func main() {
 		panic(err)
 	}
 
-	res, err = client.Search("user").Do(context.Background())
+	boolq := elastic.NewBoolQuery()
+	boolq.Must(elastic.NewMatchQuery("name", "刘德华"))
+	boolq.Filter(elastic.NewRangeQuery("age").Gt(30))
+	res, err = client.Search("user").Query(boolq).Do(context.Background())
+
 	if err != nil {
 		panic(err)
 	}
-
-	for _, item := range res.Each(reflect.TypeOf(user)) {
-		t := item.(User)
-		fmt.Printf("%#v\t", t)
-	}
-
+	fmt.Println("----", res.Hits)
 }
