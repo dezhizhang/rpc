@@ -725,3 +725,23 @@ func main() {
 }
 
 ```
+### golang操作es
+```go
+func main() {
+	host := "http://localhost:9200"
+	logger := log.New(os.Stdout, "elastic", log.LstdFlags)
+
+	client, err := elastic.NewClient(elastic.SetURL(host), elastic.SetSniff(false), elastic.SetTraceLog(logger))
+	if err != nil {
+		panic(err)
+	}
+	user := &User{Name: "tom", Sex: "1", Tel: "15992478448"}
+	do, err1 := client.Index().Index("user").Type("_create").Id("1002").BodyJson(user).Do(context.Background())
+	if err1 != nil {
+		panic(err1)
+	}
+
+	fmt.Println(do)
+}
+
+```

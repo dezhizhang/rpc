@@ -14,31 +14,111 @@ type User struct {
 	Tel  string `json:"tel"`
 }
 
-func main() {
-	host := "http://localhost:9200"
-	logger := log.New(os.Stdout, "xiaozhi", log.LstdFlags)
-	client, err := elastic.NewClient(elastic.SetURL(host), elastic.SetSniff(false), elastic.SetTraceLog(logger))
-	if err != nil {
-		panic(err)
-	}
+// 新增
+//func main() {
+//	host := "http://localhost:9200"
+//	logger := log.New(os.Stdout, "elastic", log.LstdFlags)
+//
+//	client, err := elastic.NewClient(elastic.SetURL(host), elastic.SetSniff(false), elastic.SetTraceLog(logger))
+//	if err != nil {
+//		panic(err)
+//	}
+//	user := &User{Name: "tom", Sex: "1", Tel: "15992478448"}
+//	do, err1 := client.Index().Index("user").Type("_create").Id("1002").BodyJson(user).Do(context.Background())
+//	if err1 != nil {
+//		panic(err1)
+//	}
+//
+//	fmt.Println(do)
+//}
 
-	user := &User{Name: "周华建", Sex: "男", Tel: "15083356190"}
-	do, _ := client.Index().Index("info").Type("user").Id("1001").BodyJson(user).Do(context.Background())
+// 查询
+//func main() {
+//	host := "http://localhost:9200"
+//	logger := log.New(os.Stdout, "elastic", log.LstdFlags)
+//	client, err := elastic.NewClient(elastic.SetURL(host), elastic.SetSniff(false), elastic.SetTraceLog(logger))
+//	if err != nil {
+//		panic(err)
+//	}
+//	do, err := client.Get().Index("user").Id("1002").Do(context.Background())
+//	if err != nil {
+//		panic(err)
+//	}
+//	if do.Found {
+//		fmt.Printf("Got document %s in version %d from index %s, type %s\n", do.Id, do.Version, do.Index, do.Type)
+//		var user User
+//		err := json.Unmarshal(do.Source, &user)
+//		if err != nil {
+//			panic(err)
+//		}
+//		fmt.Println(user.Name, user.Sex, user.Tel)
+//	}
+//}
 
-	fmt.Println("-----", do)
-
-	//do, i, _ := client.Ping(host).Do(context.Background())
-
-	//version, _ := client.ElasticsearchVersion(host)
-	//fmt.Println(do, i)
-	//fmt.Println("-----------")
-	//fmt.Println(version)
-
-}
+// 删除文档
+//func main() {
+//	host := "http://localhost:9200"
+//	logger := log.New(os.Stdout, "elastic", log.LstdFlags)
+//	client, err := elastic.NewClient(elastic.SetURL(host), elastic.SetSniff(false), elastic.SetTraceLog(logger))
+//
+//	if err != nil {
+//		panic(err)
+//	}
+//	do, err := client.Delete().Index("user").Id("1002").Do(context.Background())
+//	if err != nil {
+//		panic(err)
+//	}
+//
+//	fmt.Println(do.Result)
+//
+//}
 
 //func main() {
 //	host := "http://localhost:9200"
-//	logger := log.New(os.Stdout, "xiaozhi", log.LstdFlags)
-//	cient, err := elastic.NewClient(elastic.SetURL(host), elastic.SetSniff(false), elastic.SetTraceLog(logger))
+//	logger := log.New(os.Stdout, "elastic", log.LstdFlags)
+//	client, err := elastic.NewClient(elastic.SetURL(host), elastic.SetSniff(false), elastic.SetTraceLog(logger))
+//	if err != nil {
+//		panic(err)
+//	}
+//	do, err := client.Delete().Index("user").Id("1002").Do(context.Background())
+//	if err != nil {
+//		panic(err)
+//	}
+//
+//	fmt.Println(do.Result)
+//}
+
+//func main() {
+//	host := "http://localhost:9200"
+//	logger := log.New(os.Stdout, "elastic", log.LstdFlags)
+//	client, err := elastic.NewClient(elastic.SetURL(host), elastic.SetSniff(false), elastic.SetTraceLog(logger))
+//
+//	user := User{
+//		Name: "hello",
+//		Sex:  "女",
+//		Tel:  "159924784481",
+//	}
+//	do, err := client.Update().Index("user").Id("1002").Doc(&user).Do(context.Background())
+//	if err != nil {
+//		panic(err)
+//	}
+//	fmt.Println(do.Result)
 //
 //}
+
+func main() {
+	host := "http://localhost:9200"
+	logger := log.New(os.Stdout, "elastic", log.LstdFlags)
+	client, err := elastic.NewClient(elastic.SetURL(host), elastic.SetSniff(false), elastic.SetTraceLog(logger))
+
+	user := User{
+		Name: "tom",
+		Sex:  "女",
+		Tel:  "15083356190",
+	}
+	do, err := client.Update().Index("user").Id("1002").Doc(&user).Do(context.Background())
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(do.Result)
+}
