@@ -6,6 +6,7 @@ import (
 	"github.com/olivere/elastic/v7"
 	"log"
 	"os"
+	"reflect"
 )
 
 type User struct {
@@ -106,19 +107,150 @@ type User struct {
 //
 //}
 
+//func main() {
+//	host := "http://localhost:9200"
+//	logger := log.New(os.Stdout, "elastic", log.LstdFlags)
+//	client, err := elastic.NewClient(elastic.SetURL(host), elastic.SetSniff(false), elastic.SetTraceLog(logger))
+//
+//	user := User{
+//		Name: "tom",
+//		Sex:  "女",
+//		Tel:  "15083356190",
+//	}
+//	do, err := client.Update().Index("user").Id("1002").Doc(&user).Do(context.Background())
+//	if err != nil {
+//		panic(err)
+//	}
+//	fmt.Println(do.Result)
+//}
+
+//func main() {
+//	host := "http://localhost:9200"
+//	logger := log.New(os.Stdout, "elastic", log.LstdFlags)
+//	client, err := elastic.NewClient(elastic.SetURL(host), elastic.SetSniff(false), elastic.SetTraceLog(logger))
+//	if err != nil {
+//		panic(err)
+//	}
+//	user := User{
+//		Name: "刘德华",
+//		Sex:  "男",
+//		Tel:  "1541609448@qq.com",
+//	}
+//	do, err := client.Update().Index("user").Id("1002").Doc(&user).Do(context.Background())
+//	if err != nil {
+//		panic(err)
+//	}
+//
+//	fmt.Println(do.Result)
+//}
+
+//func main() {
+//	//host := "http://localhost:9200"
+//	//logger := log.New(os.Stdout, "elastic", log.LstdFlags)
+//	//
+//	//client, err := elastic.NewClient(elastic.SetURL(host), elastic.SetSniff(false), elastic.SetTraceLog(logger))
+//	//if err != nil {
+//	//	panic(err)
+//	//}
+//	//
+//	//do, err := client.Get().Index("user").Id("1002").Do(context.Background())
+//	//if do.Found {
+//	//	fmt.Printf("got document %s in version %d form index%s", do.Id, do.Version, do.Index)
+//	//	var user User
+//	//	err := json.Unmarshal(do.Source, &user)
+//	//	if err != nil {
+//	//		panic(err)
+//	//	}
+//	//	fmt.Println(user.Name, user.Sex, user.Tel)
+//	//}
+//
+//}
+
+//func main() {
+//	host := "http://localhost:9200"
+//	logger := log.New(os.Stdout, "elastic", log.LstdFlags)
+//
+//	client, err := elastic.NewClient(elastic.SetURL(host), elastic.SetSniff(false), elastic.SetTraceLog(logger))
+//	if err != nil {
+//		panic(err)
+//	}
+//	do, err := client.Get().Index("user").Id("1002").Do(context.Background())
+//	if err != nil {
+//		panic(err)
+//	}
+//	if do.Found {
+//		var user User
+//		err := json.Unmarshal(do.Source, &user)
+//		if err != nil {
+//			panic(err)
+//		}
+//		fmt.Println(user.Name, user.Sex, user.Tel)
+//
+//	}
+//}
+
+//func main() {
+//	host := "http://localhost:9200"
+//	logger := log.New(os.Stdout, "elastic", log.LstdFlags)
+//
+//	client, err := elastic.NewClient(elastic.SetURL(host), elastic.SetSniff(false), elastic.SetTraceLog(logger))
+//	if err != nil {
+//		panic(err)
+//	}
+//	user := User{
+//		Name: "周华呢",
+//		Sex:  "男",
+//		Tel:  "15992478448",
+//	}
+//	do, err := client.Update().Index("user").Id("1002").Doc(&user).Do(context.Background())
+//	if err != nil {
+//		panic(err)
+//	}
+//	fmt.Println(do.Result)
+//
+//}
+
+//func main() {
+//	host := "http://localhost:9200"
+//	logger := log.New(os.Stdout, "elastic", log.LstdFlags)
+//
+//	client, err := elastic.NewClient(elastic.SetURL(host), elastic.SetSniff(false), elastic.SetTraceLog(logger))
+//	if err != nil {
+//		panic(err)
+//	}
+//	user := User{
+//		Name: "周大大",
+//		Sex:  "男",
+//		Tel:  "1599278448",
+//	}
+//	do, err := client.Update().Index("user").Id("1002").Doc(&user).Do(context.Background())
+//	if err != nil {
+//		panic(err)
+//	}
+//	fmt.Println(do.Result)
+//
+//}
+
 func main() {
+	var err error
+	var user User
+	var client *elastic.Client
+	var res *elastic.SearchResult
 	host := "http://localhost:9200"
 	logger := log.New(os.Stdout, "elastic", log.LstdFlags)
-	client, err := elastic.NewClient(elastic.SetURL(host), elastic.SetSniff(false), elastic.SetTraceLog(logger))
-
-	user := User{
-		Name: "tom",
-		Sex:  "女",
-		Tel:  "15083356190",
-	}
-	do, err := client.Update().Index("user").Id("1002").Doc(&user).Do(context.Background())
+	client, err = elastic.NewClient(elastic.SetURL(host), elastic.SetSniff(false), elastic.SetTraceLog(logger))
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(do.Result)
+
+	res, err = client.Search("user").Do(context.Background())
+	if err != nil {
+		panic(err)
+	}
+
+	for _, item := range res.Each(reflect.TypeOf(user)) {
+		t := item.(User)
+		fmt.Printf("%#v\t", t)
+	}
+
 }
