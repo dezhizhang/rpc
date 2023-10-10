@@ -2,22 +2,11 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"github.com/olivere/elastic/v7"
 	"log"
 	"os"
-	"time"
 )
-
-type Tweet struct {
-	User     string                `json:"user"`
-	Message  string                `json:"message"`
-	Retweets int                   `json:"retweets"`
-	Image    string                `json:"image,omitempty"`
-	Created  time.Time             `json:"created,omitempty"`
-	Tags     []string              `json:"tags,omitempty"`
-	Location string                `json:"location,omitempty"`
-	Suggest  *elastic.SuggestField `json:"suggest_field,omitempty"`
-}
 
 // 新增
 //func main() {
@@ -370,57 +359,22 @@ type Tweet struct {
 //}
 
 func main() {
-	// Tweet is a structure used for serializing/deserializing data in Elasticsearch.
+	var err error
+	var client *elastic.Client
+	var res *elastic.SearchResult
 
-	const mapping = `
-{
-	"settings":{
-		"number_of_shards": 1,
-		"number_of_replicas": 0
-	},
-	"mappings":{
-		"change":{
-			"properties":{
-				"user":{
-					"type":"keyword"
-				},
-				"message":{
-					"type":"text",
-					"store": true,
-					"fielddata": true
-				},
-				"image":{
-					"type":"keyword"
-				},
-				"created":{
-					"type":"date"
-				},
-				"tags":{
-					"type":"keyword"
-				},
-				"location":{
-					"type":"geo_point"
-				},
-				"suggest_field":{
-					"type":"completion"
-				}
-			}
-		}
-	}
-}`
 	host := "http://localhost:9200"
 	logger := log.New(os.Stdout, "elastic", log.LstdFlags)
 
-	client, err := elastic.NewClient(elastic.SetURL(host), elastic.SetSniff(false), elastic.SetTraceLog(logger))
+	client, err = elastic.NewClient(elastic.SetURL(host), elastic.SetSniff(false), elastic.SetTraceLog(logger))
 	if err != nil {
 		panic(err)
 	}
-	createIndex, err := client.CreateIndex("change").BodyString(mapping).Do(context.Background())
+
+	matchPhase := elastic.NewMatchPhraseQuery("about", "测")
+	res, err = client.Search("user").Query(matchPhase).Do(context.Background())
 	if err != nil {
-		// Handle error
 		panic(err)
 	}
-	if !createIndex.Acknowledged {
-		// Not acknowledged
-	}
+	fmt.Println(res.Hits)
 }
