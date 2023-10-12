@@ -1,15 +1,25 @@
+/*
+ * :file description:
+ * :name: /mongodb/mongo_test.go
+ * :author: 张德志
+ * :copyright: (c) 2023, Tungee
+ * :date created: 2023-10-10 22:07:58
+ * :last editor: 张德志
+ * :date last edited: 2023-10-11 17:07:54
+ */
 package main
 
 import (
 	"context"
 	"fmt"
+	"testing"
+	"time"
+
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
-	"testing"
-	"time"
 )
 
 type User struct {
@@ -41,7 +51,8 @@ func TestInsert(t *testing.T) {
 			Tags:       []string{"科技", "文学"},
 			CreateTime: time.Now(),
 		}
-		result, err := client.Database("testing").Collection("users").InsertOne(context.Background(), &user)
+		result, err := client.Database("testing").Collection("users").
+			InsertOne(context.Background(), &user)
 		if err != nil {
 			panic(err)
 		}
@@ -50,7 +61,55 @@ func TestInsert(t *testing.T) {
 
 }
 
-// TestMongoSearch搜索
+//func TestMongoSearch(t *testing.T) {
+//	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+//	defer cancel()
+//
+//	client, err := mongo.Connect(ctx, options.Client().ApplyURI("mongodb://localhost:27017"))
+//	if err != nil {
+//		panic(err)
+//	}
+//	collection := client.Database("testing").Collection("user")
+//	query := bson.M{
+//		"name": bson.M{
+//			"$gt": " ",
+//		},
+//	}
+//	opt := options.Find().SetLimit(10).SetSort(bson.M{"_id": 1})
+//	cur, err := collection.Find(context.Background(), &query, opt)
+//	if err != nil {
+//		panic(err)
+//	}
+//	var user []User
+//	err = cur.All(context.Background(), &user)
+//	if err != nil {
+//		panic(err)
+//	}
+//	fmt.Println(user)
+//}
+
+// 单个查询
+//func TestMongoSearch(t *testing.T) {
+//	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+//	defer cancel()
+//
+//	client, err := mongo.Connect(ctx, options.Client().ApplyURI("mongodb://localhost:27017"))
+//	if err != nil {
+//		panic(err)
+//	}
+//	collection := client.Database("testing").Collection("users")
+//	filter := bson.D{{Key: "_id", Value: "65303cb7-3cf2-474a-a4a5-bcc9c3c46617"}}
+//
+//	var user User
+//	err = collection.FindOne(context.Background(), &filter).Decode(&user)
+//	if err != nil {
+//		panic(err)
+//	}
+//
+//	fmt.Println(user)
+//}
+
+// 单个查询
 func TestMongoSearch(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -60,19 +119,9 @@ func TestMongoSearch(t *testing.T) {
 		panic(err)
 	}
 	collection := client.Database("testing").Collection("users")
-	query := bson.M{
-		"name": bson.M{
-			"$gt": "",
-		},
-	}
-	opt := options.Find().SetLimit(10).SetSort(bson.M{"_id": 1})
-	cur, err := collection.Find(context.Background(), &query, opt)
-	if err != nil {
-		panic(err)
-	}
-
-	var user []User
-	err = cur.All(context.Background(), &user)
+	query := bson.D{{Key: "_id", Value: "47b68974-8ed6-44ab-ad4f-0c1c72a03d40"}}
+	var user User
+	err = collection.FindOne(context.Background(), &query).Decode(&user)
 	if err != nil {
 		panic(err)
 	}
@@ -80,7 +129,6 @@ func TestMongoSearch(t *testing.T) {
 
 }
 
-// TestDeleteMongo 册除数据
 func TestDeleteMongo(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -89,13 +137,11 @@ func TestDeleteMongo(t *testing.T) {
 		panic(err)
 	}
 	collection := client.Database("testing").Collection("users")
-
-	result, err := collection.DeleteOne(context.Background(), bson.M{"_id": "4e1f5ce4-2be9-4084-9277-70d16e0b549a"})
+	result, err := collection.DeleteOne(context.Background(), bson.M{"_id": "47b68974-8ed6-44ab-ad4f-0c1c72a03d40"})
 	if err != nil {
 		panic(err)
 	}
 	fmt.Println(result.DeletedCount)
-
 }
 
 // TestUpdateMongo 更新文档
@@ -107,19 +153,16 @@ func TestUpdateMongo(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
-	collection := client.Database("testing").Collection("users")
 
-	query := bson.M{"_id": "21d6f563-6656-42d1-b192-1a56938e2379"}
-	update := bson.M{
-		"$set": bson.M{
-			"name": "周华建",
-		},
-	}
+	collection := client.Database("testing").Collection("users")
+	query := bson.M{"_id": "062a267e-e569-4cba-b4cf-a2ebce4d185d"}
+	update := bson.M{"$set": bson.M{
+		"name": "hello change info",
+	}}
 	opt := options.Update().SetUpsert(true)
 	result, err := collection.UpdateOne(context.Background(), query, update, opt)
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(result.MatchedCount)
-
+	fmt.Println(result.ModifiedCount)
 }
