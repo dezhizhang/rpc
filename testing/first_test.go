@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"google.golang.org/protobuf/proto"
 	"testing"
-	p "xiaozhi/proto"
+	pb "xiaozhi/proto"
 )
 
 func TestName(t *testing.T) {
@@ -13,17 +13,15 @@ func TestName(t *testing.T) {
 }
 
 func TestProto(t *testing.T) {
-	user := p.User{
-		Username: "刘德华",
-		Age:      44,
+	user := pb.User{
+		Username: "周大大",
+		Age:      22,
 	}
 	marshal, err := proto.Marshal(&user)
 	if err != nil {
 		panic(err)
 	}
-
-	newUser := &p.User{}
+	newUser := &pb.User{}
 	err = proto.Unmarshal(marshal, newUser)
-
 	fmt.Println(newUser)
 }
