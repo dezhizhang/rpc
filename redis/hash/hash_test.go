@@ -6,50 +6,42 @@ import (
 	"testing"
 )
 
-// TestHset 设置hash
-func TestHset(t *testing.T) {
-	var err error
+func TestHSet(t *testing.T) {
 	ctx := context.Background()
 	rdb := redis.NewClient(&redis.Options{
-		Addr: "127.0.0.1:6379",
-		DB:   0,
+		Addr:     "localhost:6379",
+		Password: "",
+		DB:       0,
 	})
-
 	result, err := rdb.Ping(ctx).Result()
 	if err != nil {
 		panic(err)
 	}
 	t.Log(result)
-
 	err = rdb.HSet(ctx, "user", "name", "张德志").Err()
 	if err != nil {
 		panic(err)
 	}
-
-	t.Logf("设置值成功")
-
+	t.Log("设置值成功")
 }
 
-// TestHGet 获取哈希
 func TestHGet(t *testing.T) {
-	var err error
 	ctx := context.Background()
 	rdb := redis.NewClient(&redis.Options{
-		Addr: "127.0.0.1:6379",
-		DB:   0,
+		Addr:     "localhost:6379",
+		Password: "",
+		DB:       0,
 	})
-	_, err = rdb.Ping(ctx).Result()
+	_, err := rdb.Ping(ctx).Result()
 	if err != nil {
 		panic(err)
 	}
-	t.Logf("连接数据库成功")
-
+	t.Log("连接数据库成功")
 	result, err1 := rdb.HGet(ctx, "user", "name").Result()
 	if err1 != nil {
 		panic(err1)
 	}
-	t.Logf(result)
-
+	t.Log(result)
 }
 
 // TestHGetAll 获取所有哈希值
@@ -57,14 +49,15 @@ func TestHGetAll(t *testing.T) {
 	var err error
 	ctx := context.Background()
 	rdb := redis.NewClient(&redis.Options{
-		Addr: "127.0.0.1:6379",
-		DB:   0,
+		Addr:     "localhost:6379",
+		Password: "",
+		DB:       0,
 	})
 	_, err = rdb.Ping(ctx).Result()
 	if err != nil {
 		panic(err)
 	}
-	t.Log("连接数据库成功")
+	t.Logf("连接数据库成功")
 	result, err1 := rdb.HGetAll(ctx, "user").Result()
 	if err1 != nil {
 		panic(err1)
@@ -72,19 +65,20 @@ func TestHGetAll(t *testing.T) {
 	t.Log(result)
 }
 
-// TestHIncrBy 哈希累加
+// 哈希累加
 func TestHIncrBy(t *testing.T) {
 	var err error
 	ctx := context.Background()
 	rdb := redis.NewClient(&redis.Options{
-		Addr: "127.0.0.1:6379",
-		DB:   0,
+		Addr:     "localhost:6379",
+		Password: "",
+		DB:       0,
 	})
 	_, err = rdb.Ping(ctx).Result()
 	if err != nil {
 		panic(err)
 	}
-	t.Log("连接数据库成功")
+	t.Log("数据库连接成功")
 	count, err1 := rdb.HIncrBy(ctx, "user", "count", 2).Result()
 	if err1 != nil {
 		panic(err1)
@@ -92,34 +86,38 @@ func TestHIncrBy(t *testing.T) {
 	t.Log(count)
 }
 
-// 获取所有TestHkeys的key
-func TestHkeys(t *testing.T) {
+// 获取所有TestHKeys的key
+
+func TestHKeys(t *testing.T) {
 	var err error
 	ctx := context.Background()
 	rdb := redis.NewClient(&redis.Options{
-		Addr: "127.0.0.1:6379",
-		DB:   0,
+		Addr:     "localhost:6379",
+		Password: "",
+		DB:       0,
 	})
 	_, err = rdb.Ping(ctx).Result()
 	if err != nil {
 		panic(err)
 	}
 	t.Log("连接数据库成功")
-
 	keys, err1 := rdb.HKeys(ctx, "user").Result()
 	if err1 != nil {
-		panic(err1)
+		panic(err)
 	}
 	t.Log(keys)
+
 }
 
 // TestHLen 获取hash的长度
-func TestHLen(t *testing.T) {
+
+func TestLen(t *testing.T) {
 	var err error
 	ctx := context.Background()
 	rdb := redis.NewClient(&redis.Options{
-		Addr: "127.0.0.1:6379",
-		DB:   0,
+		Addr:     "localhost:6379",
+		Password: "",
+		DB:       0,
 	})
 	_, err = rdb.Ping(ctx).Result()
 	if err != nil {
@@ -131,6 +129,68 @@ func TestHLen(t *testing.T) {
 		panic(err1)
 	}
 	t.Log(result)
+}
+
+// 批量获取
+func TestMGet(t *testing.T) {
+	var err error
+	ctx := context.Background()
+	rdb := redis.NewClient(&redis.Options{
+		Addr:     "localhost:6379",
+		Password: "",
+		DB:       0,
+	})
+	_, err = rdb.Ping(ctx).Result()
+	if err != nil {
+		panic(err)
+	}
+	result, err1 := rdb.HMGet(ctx, "user", "name", "count").Result()
+	if err1 != nil {
+		panic(err)
+	}
+	t.Log(result)
+}
+
+// 批量设置
+func TestHMSet(t *testing.T) {
+	var err error
+	ctx := context.Background()
+	rdb := redis.NewClient(&redis.Options{
+		Addr:     "localhost:6379",
+		Password: "",
+		DB:       0,
+	})
+	_, err = rdb.Ping(ctx).Result()
+	if err != nil {
+		panic(err)
+	}
+	data := make(map[string]interface{})
+	data["name"] = "刘德华"
+	data["age"] = 44
+	data["gender"] = "男"
+
+	err = rdb.HMSet(ctx, "user", data).Err()
+	if err != nil {
+		panic(err)
+	}
+}
+
+func TestHDel(t *testing.T) {
+	var err error
+	ctx := context.Background()
+	rdb := redis.NewClient(&redis.Options{
+		Addr:     "localhost:6379",
+		Password: "",
+		DB:       0,
+	})
+	_, err = rdb.Ping(ctx).Result()
+	if err != nil {
+		panic(err)
+	}
+	err = rdb.HDel(ctx, "user", "name").Err()
+	if err != nil {
+		panic(err)
+	}
 
 }
 
