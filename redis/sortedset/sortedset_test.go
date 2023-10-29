@@ -104,3 +104,86 @@ func TestZRange(t *testing.T) {
 	}
 	t.Log(result)
 }
+
+func TestZRangeByScore(t *testing.T) {
+	var err error
+	ctx := context.Background()
+	rdb := redis.NewClient(&redis.Options{
+		Addr:     "localhost:6379",
+		Password: "",
+		DB:       0,
+	})
+	_, err = rdb.Ping(ctx).Result()
+	if err != nil {
+		panic(err)
+	}
+	opt := redis.ZRangeBy{
+		Min:    "2",
+		Max:    "1000",
+		Offset: 0,
+		Count:  5,
+	}
+	vals, err1 := rdb.ZRangeByScore(ctx, "set", &opt).Result()
+	if err1 != nil {
+		panic(err1)
+	}
+	t.Log(vals)
+}
+
+func TestZRem(t *testing.T) {
+	var err error
+	ctx := context.Background()
+	rdb := redis.NewClient(&redis.Options{
+		Addr:     "localhost:6379",
+		Password: "",
+		DB:       0,
+	})
+	_, err = rdb.Ping(ctx).Result()
+	if err != nil {
+		panic(err)
+	}
+	err = rdb.ZRem(ctx, "zAdd", "张德志").Err()
+	if err != nil {
+		panic(err)
+	}
+	t.Log("删除成功")
+}
+
+// 根据索引删除元素
+func TestZRemRangeByRank(t *testing.T) {
+	var err error
+	ctx := context.Background()
+	rdb := redis.NewClient(&redis.Options{
+		Addr:     "localhost:6379",
+		Password: "",
+		DB:       0,
+	})
+	_, err = rdb.Ping(ctx).Result()
+	if err != nil {
+		panic(err)
+	}
+	err = rdb.ZRemRangeByRank(ctx, "zAdd", 0, 1).Err()
+	if err != nil {
+		panic(err)
+	}
+	t.Log("删除成功")
+}
+
+func TestZRank(t *testing.T) {
+	var err error
+	ctx := context.Background()
+	rdb := redis.NewClient(&redis.Options{
+		Addr:     "localhost:6379",
+		Password: "",
+		DB:       0,
+	})
+	_, err = rdb.Ping(ctx).Result()
+	if err != nil {
+		panic(err)
+	}
+	result, err1 := rdb.ZRank(ctx, "zAdd", "张德志").Result()
+	if err1 != nil {
+		panic(err1)
+	}
+	t.Log(result)
+}
