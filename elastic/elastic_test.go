@@ -210,3 +210,94 @@ func TestBatchCreate(t *testing.T) {
 
 	t.Log(do.Created())
 }
+
+// 查询文档
+func TestFindDoc(t *testing.T) {
+	client, err := elastic.NewClient(
+		elastic.SetSniff(false),
+		elastic.SetURL("http://localhost:9200"),
+	)
+	if err != nil {
+		panic(err)
+	}
+
+	query := elastic.NewBoolQuery()
+	res, err1 := client.Search("user").Query(query).From(0).Size(10).Do(context.Background())
+	if err1 != nil {
+		panic(err1)
+	}
+
+	count := res.Hits.TotalHits.Value
+	t.Log(count)
+	for _, val := range res.Hits.Hits {
+		t.Log(string(val.Source))
+	}
+
+}
+
+// 精确查询
+func TestFindTermDoc(t *testing.T) {
+	client, err := elastic.NewClient(
+		elastic.SetSniff(false),
+		elastic.SetURL("http://localhost:9200"),
+	)
+	if err != nil {
+		panic(err)
+	}
+
+	query := elastic.NewTermQuery("nickname", "晓智")
+	res, err1 := client.Search("user").Query(query).From(0).Size(10).Do(context.Background())
+	if err1 != nil {
+		panic(err1)
+	}
+
+	count := res.Hits.TotalHits.Value
+
+	t.Log(count)
+
+	for _, val := range res.Hits.Hits {
+		t.Log(val.Source)
+	}
+
+}
+
+// 模湖查询
+func TestFinMathDoc(t *testing.T) {
+	client, err := elastic.NewClient(
+		elastic.SetSniff(false),
+		elastic.SetURL("http://localhost:9200"),
+	)
+
+	if err != nil {
+		panic(err)
+	}
+
+	query := elastic.NewMatchQuery("desc", "It从业人员")
+	res, err1 := client.Search("user").Query(query).From(0).Size(10).Do(context.Background())
+	if err1 != nil {
+		panic(err1)
+	}
+
+	count := res.Hits.TotalHits.Value
+	t.Log(count)
+
+	for _, val := range res.Hits.Hits {
+		t.Log(string(val.Source))
+	}
+}
+
+// 文档更新
+func TestUpdateDoc(t *testing.T) {
+	client, err := elastic.NewClient(elastic.SetSniff(false), elastic.SetURL("http://localhost:9200"))
+	if err != nil {
+		panic(err)
+	}
+
+	updateId := "8VLDh4sBP_UzlGBnlTqW"
+
+	do, err1 := client.Update().Index("user").Id(updateId).Doc(map[string]any{"username": "晓晓智"}).Do(context.Background())
+	if err1 != nil {
+		panic(err1)
+	}
+	t.Log(do)
+}
