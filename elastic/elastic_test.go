@@ -131,3 +131,82 @@ func TestCreateDoc(t *testing.T) {
 	t.Log(do)
 
 }
+
+// 根据id删除
+func TestDeleteDocById(t *testing.T) {
+	client, err := elastic.NewClient(elastic.SetSniff(false),
+		elastic.SetURL("http://localhost:9200"),
+	)
+	if err != nil {
+		panic(err)
+	}
+	deleteId := "7VKzh4sBP_UzlGBnhzrD"
+	do, err1 := client.Delete().Index("user").Id(deleteId).Refresh("true").Do(context.Background())
+	if err1 != nil {
+		panic(err1)
+	}
+
+	t.Log(do)
+
+}
+
+// 批量删除
+func TestBatchDeleteDocById(t *testing.T) {
+	list := []string{"91LDh4sBP_UzlGBnwzpC", "9VLDh4sBP_UzlGBntjr8"}
+	client, err := elastic.NewClient(
+		elastic.SetSniff(false),
+		elastic.SetURL("http://localhost:9200"),
+	)
+	if err != nil {
+		panic(err)
+	}
+	bulk := client.Bulk().Index("user").Refresh("true")
+	for _, s := range list {
+		req := elastic.NewBulkDeleteRequest().Id(s)
+		bulk.Add(req)
+	}
+
+	do, err1 := bulk.Do(context.Background())
+	if err1 != nil {
+		panic(err1)
+	}
+	t.Log(do.Succeeded())
+}
+
+// 批量添加
+func TestBatchCreate(t *testing.T) {
+	list := []User{
+		{
+			ID:       12,
+			Username: "张三",
+			Nickname: "三",
+			CreateAt: time.Now(),
+		},
+		{
+			ID:       13,
+			Username: "李四",
+			Nickname: "阿四",
+			CreateAt: time.Now(),
+		},
+	}
+
+	client, err := elastic.NewClient(
+		elastic.SetSniff(false),
+		elastic.SetURL("http://localhost:9200"),
+	)
+	if err != nil {
+		panic(err)
+	}
+	bulk := client.Bulk().Index("user").Refresh("true")
+	for _, user := range list {
+		doc := elastic.NewBulkCreateRequest().Doc(&user)
+		bulk.Add(doc)
+	}
+
+	do, err1 := bulk.Do(context.Background())
+	if err1 != nil {
+		panic(err1)
+	}
+
+	t.Log(do.Created())
+}
