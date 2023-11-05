@@ -74,3 +74,71 @@ func TestWriteFile(t *testing.T) {
 	writer.Flush()
 
 }
+
+// 文件不存在则创建文件存在则更新
+func TestWriteExitFile(t *testing.T) {
+	filePath := "./abc.txt"
+	file, err := os.OpenFile(filePath, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0666)
+	if err != nil {
+		t.Logf("打开文件失败%s", err)
+		return
+	}
+
+	defer file.Close()
+
+	str := "您好晓智科技有限会司\r\n"
+	writer := bufio.NewWriter(file)
+	for i := 0; i < 10; i++ {
+		writer.WriteString(str)
+	}
+
+	writer.Flush()
+
+}
+
+// 向文件中追加内容
+func TestWriteAppend(t *testing.T) {
+	filePath := "./abc.txt"
+	file, err := os.OpenFile(filePath, os.O_WRONLY|os.O_APPEND, 0666)
+	if err != nil {
+		t.Logf("打开文件失败%s", err)
+	}
+	defer file.Close()
+
+	str := "abc hello world"
+	writer := bufio.NewWriter(file)
+	for i := 0; i < 10; i++ {
+		writer.WriteString(str)
+	}
+	writer.Flush()
+}
+
+// 先读文件后写入文件
+func TestReadAndWriteFile(t *testing.T) {
+	filePath := "./abc.txt"
+	file, err := os.OpenFile(filePath, os.O_RDWR|os.O_APPEND, 0666)
+	if err != nil {
+		t.Logf("读取文件失败%s", err)
+		return
+	}
+
+	// 关闭文件
+	defer file.Close()
+	// 读取文件
+	reader := bufio.NewReader(file)
+	for {
+		str, err := reader.ReadString('\n')
+		if err == io.EOF { // 读取到文件未尾
+			break
+		}
+		// 量示到终端
+		t.Log(str)
+	}
+
+	str := "hello 北京你好\r\n"
+	writer := bufio.NewWriter(file)
+	for i := 0; i < 5; i++ {
+		writer.WriteString(str)
+	}
+	writer.Flush()
+}
