@@ -50,3 +50,27 @@ func TestIoReadFile(t *testing.T) {
 	}
 	t.Logf(string(file))
 }
+
+// 写入文件
+func TestWriteFile(t *testing.T) {
+	file, err := os.OpenFile("./abc.txt", os.O_WRONLY|os.O_CREATE, 0666)
+	if err != nil {
+		t.Logf("打开文件失败%s", err)
+		return
+	}
+	str := "hello, Gardon\n"
+
+	defer file.Close()
+
+	writer := bufio.NewWriter(file)
+
+	// 写入时, 使用带缓存的*writer
+	for i := 0; i < 5; i++ {
+		writer.WriteString(str)
+	}
+
+	// 带缓存因此调用WriteString方法时
+	// 内容是写入到缓存的，因些将缓存中的数据写入磁盘
+	writer.Flush()
+
+}
